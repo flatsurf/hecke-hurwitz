@@ -57,11 +57,14 @@ def abelian_group_element_decoding(invariants, i):
         i //= k
     return tuple(result)
 
+
 def abelian_group_add(invariants, a, b):
     return tuple((aa+bb) % inv for (aa, bb, inv) in zip(a, b, invariants))
 
+
 def abelian_group_mul(invariants, a, b):
     return tuple((aa*bb) % inv for (aa, bb, inv) in zip(a, b, invariants))
+
 
 def abelian_group_mul_permutation(invariants, a):
     r"""
@@ -82,6 +85,43 @@ def abelian_group_mul_permutation(invariants, a):
         y = abelian_group_mul(invariants, a, x)
         result.append(abelian_group_element_encoding(invariants, y))
     return S(result)
+
+
+def abelian_group_add_permutation(invariants, a):
+    n = prod(invariants)
+    S = SymmetricGroup(n)
+    result = []
+    for i in range(1, n+1):
+        x = abelian_group_element_decoding(invariants, i)
+        y = abelian_group_add(invariants, a, x)
+        result.append(abelian_group_element_encoding(invariants, y))
+    return S(result)
+
+
+def abelian_group_permutation_gens(invariants):
+    gens = []
+    k = len(invariants)
+    for i in range(k):
+        a = [0] * k
+        a[i] = 1
+        gens.append(abelian_group_add_permutation(invariants, a))
+    return gens
+
+
+def symmetric_group_gens(domain):
+    r"""
+    EXAMPLES::
+
+        sage: symmetric_group_gens([1, 3])
+        sage: symmetric_group_gens([1, 3, 5, 7])
+    """
+    if len(domain) == 1:
+        return []
+    transposition = '({}, {})'.format(domain[0], domain[1]) 
+    if len(domain) == 2:
+        return [transposition]
+    cycle = '(' + ','.join(str(i) for i in domain) + ')'
+    return [transposition, cycle]
 
 @cached_function
 def abelian_group_characters(invariants):
